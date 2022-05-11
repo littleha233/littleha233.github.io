@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>FengMeng&#39;s Blogs</title>
+    <link>https://littleha233.github.io/</link>
+    <description>Recent content on FengMeng&#39;s Blogs</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Wed, 11 May 2022 14:11:59 +0800</lastBuildDate><atom:link href="https://littleha233.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>My First Post</title>
+      <link>https://littleha233.github.io/post/my-first-post/</link>
+      <pubDate>Wed, 11 May 2022 14:11:59 +0800</pubDate>
+      
+      <guid>https://littleha233.github.io/post/my-first-post/</guid>
+      <description>合约位置 /Users/meng/Desktop/fisco/console/contracts/solidity 合约编译 1 2 3 4 5 6 7 8 9 10 11 12 13 meng@FM console % bash sol2java.sh -h usage: Compile Solidity Tool: -h,--help -l,--libraries &amp;lt;arg&amp;gt; [Optional] Set library address information built into the solidity contract eg: --libraries lib1:lib1_address lib2:lib2_address -o,--output &amp;lt;arg&amp;gt; [Optional] The file path of the generated java code, default is contracts/sdk/java/ -p,--package &amp;lt;arg&amp;gt; [Optional] The package name of the generated java code, default is com -s,--sol &amp;lt;arg&amp;gt; [Optional] The solidity file path or the solidity directory path, default is contracts/solidity/ 合约编译实例(这一步的目的是将编写好的合约代码转换为Java代码，供Java SDK调用) bash sol2java.sh -o contracts/sdk/java/</description>
+    </item>
+    
+  </channel>
+</rss>
