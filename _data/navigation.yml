@@ -1,22 +1,22 @@
 # main links links
 main:
-  - title: "Publications"
-    url: /publications/
+  - title: "区块链技术"
+    url: /technology/
 
-  - title: "Talks"
-    url: /talks/    
+  - title: "算法"
+    url: /algorithm/    
 
-  - title: "Teaching"
-    url: /teaching/    
+  - title: "文献摘抄"
+    url: /article/    
     
-  - title: "Portfolio"
-    url: /portfolio/
+  - title: "编程"
+    url: /pragram/
         
-  - title: "Blog Posts"
-    url: /year-archive/
+#   - title: "Blog Posts"
+#     url: /year-archive/
     
-  - title: "CV"
-    url: /cv/
+#   - title: "CV"
+#     url: /cv/
     
-  - title: "Guide"
-    url: /markdown/
+#   - title: "Guide"
+#     url: /markdown/
