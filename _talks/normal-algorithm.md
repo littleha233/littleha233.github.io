@@ -7,6 +7,8 @@ date: 2023-03-06
 location: "Beijing China"
 ---
 
+[Download paper here](http://littleha233.github.io/files/Normal-Alogorithm.pdf)
+
 该文件包含了编程的常用算法，依次是：
 
 1. 动态规划
