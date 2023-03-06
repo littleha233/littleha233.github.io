@@ -1,7 +1,7 @@
 ---
 title: "Blockchain and MPC: some questions"
 collection: publications
-permalink: /publication/0223面试
+permalink: /publication/Blockchain&MPC
 excerpt: 'MPC的定义、技术路线及相关细节.'
 date: 2023-03-06
 paperurl: 'http://littleha233.github.io/files/Blockchain&MPC.pdf'
