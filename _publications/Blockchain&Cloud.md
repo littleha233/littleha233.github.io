@@ -1,18 +1,17 @@
 ---
 title: "Blockchain and Cloud: applications and technology"
 collection: publications
-permalink: /publication/Blockchain&Cloud.md
+permalink: /publication/Blockchain&Cloud
 excerpt: '区块链与云计算技术的结合应用介绍.'
 date: 2023-03-06
 paperurl: 'http://littleha233.github.io/files/Blockchain&Cloud.pdf'
-citation: 'Adios,. (2023-03-06).'
+citation: 'Adios,. (2023-02-23).'
 ---
 区块链与云计算技术的结合应用介绍
 
 [Download paper here](http://littleha233.github.io/files/Blockchain&Cloud.pdf)
 
 Recommended citation: Adios 2023-03-06.
-
 
 ### 区块链与云计算有什么结合应用
 
