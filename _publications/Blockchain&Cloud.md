@@ -1,3 +1,19 @@
+---
+title: "Blockchain and Cloud: applications and technology"
+collection: publications
+permalink: /publication/Blockchain&Cloud.md
+excerpt: '区块链与云计算技术的结合应用介绍.'
+date: 2023-03-06
+paperurl: 'http://littleha233.github.io/files/Blockchain&Cloud.pdf'
+citation: 'Adios,. (2023-03-06).'
+---
+区块链与云计算技术的结合应用介绍
+
+[Download paper here](http://littleha233.github.io/files/Blockchain&Cloud.pdf)
+
+Recommended citation: Adios 2023-03-06.
+
+
 ### 区块链与云计算有什么结合应用
 
 区块链和云计算是两种不同的技术，但它们可以结合起来产生一些有趣的应用。以下是一些区块链和云计算结合应用的例子：
