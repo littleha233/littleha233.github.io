@@ -1,13 +1,13 @@
----
-title: "区块链与云计算的结合应用"
+title: "Blockchain and Cloud: applications and technology"
 collection: publications
-permalink: /publication/20230306区块链与云计算
-excerpt: '区块链与云计算的结合应用.'
+permalink: /publication/Blockchain&Cloud
+excerpt: 'MPC的定义、技术路线及相关细节.'
 date: 2023-03-06
-venue: 'Journal 1'
-paperurl: 'http://littleha233.github.io/files/Blockchain&Cloud.pdf'
-citation: 'Adios(2023-03-06)Blockchain & Cloud computing.'
+paperurl: 'http://littleha233.github.io/files/Blockchain&MPC.pdf'
+citation: 'Adios,. (2023-02-23).'
 ---
-这篇文章记载了区块链与云计算可能的结合应用案例，并介绍了一些云计算案例。
-[Download paper here](http://littleha233.github.io/files/Blockchain&Cloud.pdf)
-citation: 'Adios(2023-03-06)Blockchain & Cloud computing.'
+MPC的定义、技术路线及相关细节
+
+[Download paper here](http://littleha233.github.io/files/Blockchain&MPC.pdf)
+
+Recommended citation: Adios 2023-02-23.
