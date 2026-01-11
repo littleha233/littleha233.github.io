@@ -1,0 +1,30 @@
+baseURL = "https://littleha233.github.io/"
+languageCode = "zh-cn"
+title = "Nicola Von | Engineering Notes"
+theme = "PaperMod"
+
+enableRobotsTXT = true
+enableEmoji = false
+
+[params]
+  author = "Nicola Von"
+  ShowReadingTime = true
+  ShowCodeCopyButtons = true
+  ShowPostNavLinks = true
+  ShowBreadCrumbs = true
+  defaultTheme = "auto"
+
+  [params.homeInfoParams]
+    Title = "Hi, I'm Nicola 👋"
+    Content = "Wallet Engineering · Blockchain · Security · Systems"
+
+[menu]
+  [[menu.main]]
+    name = "Posts"
+    url = "/posts/"
+    weight = 1
+
+  [[menu.main]]
+    name = "About"
+    url = "/about/"
+    weight = 2
