@@ -1,7 +1,7 @@
 ---
 title: "Init Blog"
 date: 2026-01-12T03:33:51+08:00
-draft: true
+draft: false
 ---
 
 这是我的第一篇博客。
