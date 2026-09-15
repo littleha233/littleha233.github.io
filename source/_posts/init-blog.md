@@ -1,6 +1,6 @@
 ---
 title: "Init Blog"
-date: 2026-01-12T03:33:51+08:00
+date: 2026-01-12 03:33:51
 draft: false
 description: "博客的起点：用文字记录钱包工程、区块链、系统与安全的实践。"
 categories: ["工作随记"]

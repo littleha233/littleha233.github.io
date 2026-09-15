@@ -1,0 +1,54 @@
+title: Nicola Von
+subtitle: 工程实践 · 研究记录
+description: 记录钱包工程、区块链、系统与安全的实践与思考。
+author: Nicola Von
+avatar: /favicon.svg
+favicon: /favicon.svg
+language: zh-CN
+timezone: Asia/Shanghai
+url: https://littleha233.github.io
+root: /
+permalink: posts/:title/
+pretty_urls:
+  trailing_index: false
+  trailing_html: false
+source_dir: source
+public_dir: public
+tag_dir: tags
+archive_dir: archives
+category_dir: categories
+tag_map:
+  EdDSA: eddsa
+  Git: git
+  Go: go
+  Hugo: hugo
+  MPC: mpc
+new_post_name: :title.md
+default_layout: post
+titlecase: false
+external_link:
+  enable: true
+  field: site
+filename_case: 0
+render_drafts: false
+post_asset_folder: true
+relative_link: false
+future: false
+highlight:
+  enable: true
+  line_number: true
+  auto_detect: false
+  tab_replace: '  '
+prismjs:
+  enable: false
+theme: stellar
+per_page: 10
+pagination_dir: page
+skip_render:
+  - files/**
+  - favicon.svg
+feed:
+  type: rss2
+  path: index.xml
+  limit: 50
+  content: false

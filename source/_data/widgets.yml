@@ -1,0 +1,18 @@
+welcome:
+  layout: markdown
+  title: 工程笔记
+  content: |
+    记录工作中的实践，也留下研究时的思考。
+
+    钱包工程 · 区块链 · 系统与安全
+recent:
+  layout: recent
+  title: 最近记录
+  rss: /index.xml
+  limit: 6
+toc:
+  layout: toc
+  list_number: false
+  min_depth: 2
+  max_depth: 4
+  collapse: false

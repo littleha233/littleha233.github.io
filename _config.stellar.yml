@@ -1,0 +1,76 @@
+logo:
+  avatar: '[/favicon.svg](/about/)'
+  title: '[Nicola Von](/)'
+  subtitle: '工程实践 · 研究记录'
+menubar:
+  items:
+    - id: post
+      icon: default:documents
+      title: 博客
+      url: /
+    - id: archive
+      icon: default:calendar
+      title: 归档
+      url: /archives/
+    - id: writing
+      icon: default:documents
+      title: 写作
+      url: /writing/
+    - id: about
+      icon: default:shield-user
+      title: 关于
+      url: /about/
+site_tree:
+  home:
+    leftbar: welcome, recent
+    rightbar: null
+  index_blog:
+    leftbar: welcome, recent
+    rightbar: null
+  post:
+    leftbar: recent
+    rightbar: toc
+  page:
+    leftbar: welcome
+    rightbar: toc
+article:
+  type: tech
+  card_style: classic
+  license: false
+  share: [link]
+search:
+  service: local_search
+  local_search:
+    field: post
+    path: /search.json
+    content: true
+comments:
+  service: null
+footer:
+  content: |
+    © Nicola Von · 工程笔记
+
+    使用 [Hexo](https://hexo.io/) 与 [Stellar](https://github.com/xaoxuu/hexo-theme-stellar) 构建 · [GitHub](https://github.com/littleha233/littleha233.github.io) · [RSS](/index.xml)
+style:
+  prefers_theme: auto
+  leftbar:
+    ui-style: card
+    background-image: none
+  codeblock:
+    highlightjs_theme: /vendor/atom-one-dark.min.css
+  error_page: /favicon.svg
+dependencies:
+  marked: /vendor/marked.umd.js
+  lazyload:
+    js: /vendor/lazyload.min.js
+plugins:
+  scrollreveal:
+    enable: false
+  preload:
+    enable: false
+  copycode:
+    enable: true
+    default_text: 复制
+    success_text: 已复制
+default:
+  avatar: /favicon.svg

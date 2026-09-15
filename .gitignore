@@ -2,3 +2,7 @@
 /resources/
 /.hugo_build.lock
 .DS_Store
+/node_modules/
+/db.json
+/node_modules/.cache/
+/npm-debug.log

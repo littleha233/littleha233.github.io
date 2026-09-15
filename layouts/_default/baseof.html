@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ if not .IsHome }}{{ .Title }} · {{ end }}Nicola Von · 工程笔记</title>
+  <meta name="description" content="{{ .Description | default .Site.Params.description }}">
+  <link rel="canonical" href="{{ .Permalink }}">
+  <meta property="og:title" content="{{ .Title }}">
+  <meta property="og:description" content="{{ .Description | default .Site.Params.description }}">
+  <meta property="og:url" content="{{ .Permalink }}">
+  <meta property="og:type" content="{{ if eq .Section "posts" }}article{{ else }}website{{ end }}">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
+  <link rel="alternate" type="application/rss+xml" title="Nicola Von · 工程笔记" href="{{ "index.xml" | relURL }}">
+  {{ $css := resources.Get "css/blog.css" | minify | fingerprint }}
+  <link rel="stylesheet" href="{{ $css.RelPermalink }}">
+  <script>try{var t=localStorage.getItem('blog-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+<aside class="sidebar">
+  <a class="brand" href="{{ "/" | relURL }}" aria-label="Nicola Von 首页"><span class="monogram">N<span>v.</span></span><span>Nicola Von<small>ENGINEERING NOTES</small></span></a>
+  <div class="sidebar-inner">
+    <p class="nav-label">笔记空间</p>
+    <nav aria-label="主导航">
+      <a href="{{ "/" | relURL }}" {{ if .IsHome }}aria-current="page"{{ end }}><span aria-hidden="true">▦</span> 概览</a>
+      <a href="{{ "posts/" | relURL }}" {{ if eq .Section "posts" }}aria-current="page"{{ end }}><span aria-hidden="true">≡</span> 全部文章 <small>{{ len (where .Site.RegularPages "Section" "posts") }}</small></a>
+      <a href="{{ "categories/" | relURL }}" {{ if eq .Section "categories" }}aria-current="page"{{ end }}><span aria-hidden="true">▤</span> 主题分类</a>
+      <a href="{{ "archives/" | relURL }}" {{ if eq .Section "archives" }}aria-current="page"{{ end }}><span aria-hidden="true">◷</span> 时间归档</a>
+      <a href="{{ "about/" | relURL }}" {{ if eq .Section "about" }}aria-current="page"{{ end }}><span aria-hidden="true">◎</span> 关于我</a>
+    </nav>
+    <div class="sidebar-topics"><p class="nav-label">研究主题</p>{{ range .Site.Taxonomies.categories.Alphabetical }}<a href="{{ .Page.RelPermalink }}">{{ .Page.Title }}<span>{{ .Count }}</span></a>{{ end }}</div>
+    <div class="sidebar-bottom"><p>把实践写下来，<br>让思考有迹可循。</p><a href="https://github.com/littleha233/littleha233.github.io">GitHub ↗</a><a href="{{ "index.xml" | relURL }}">RSS ↗</a></div>
+  </div>
+</aside>
+<div class="workspace">
+  <header class="topbar"><span>个人博客 <span class="slash">/</span> <strong>{{ if .IsHome }}概览{{ else }}{{ .Title }}{{ end }}</strong></span><div class="tools"><a class="search-link" href="{{ "search/" | relURL }}">搜索笔记 <kbd>/</kbd></a><button class="theme-toggle" type="button" aria-label="切换深色模式" title="切换深浅模式">◐</button></div></header>
+  <main id="main" tabindex="-1">{{ block "main" . }}{{ end }}</main>
+  <footer class="footer"><span>© {{ now.Year }} Nicola Von</span><span>工程实践 · 研究记录 · 长期积累</span><a href="#main">回到顶部 ↑</a></footer>
+</div>
+{{ $js := resources.Get "js/blog.js" | minify | fingerprint }}<script src="{{ $js.RelPermalink }}" defer></script>
+</body></html>

@@ -1,13 +1,16 @@
 baseURL = "https://littleha233.github.io/"
 languageCode = "zh-cn"
 title = "Nicola Von | Engineering Notes"
-theme = "PaperMod"
+defaultContentLanguage = "zh"
+hasCJKLanguage = true
+summaryLength = 100
 
 enableRobotsTXT = true
 enableEmoji = false
 
 [params]
   author = "Nicola Von"
+  description = "记录钱包工程、区块链协议、系统与安全的实践与思考。"
   ShowReadingTime = true
   ShowCodeCopyButtons = true
   ShowPostNavLinks = true
@@ -28,3 +31,15 @@ enableEmoji = false
     name = "About"
     url = "/about/"
     weight = 2
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+[markup.highlight]
+  style = "github-dark"
+  lineNos = false
+[markup.tableOfContents]
+  startLevel = 2
+  endLevel = 4
