@@ -1,6 +1,6 @@
 ---
 title: "EdDSA MPC实现"
-date: 2026-01-12T21:01:06+08:00
+date: 2026-01-12 21:01:06
 draft: false
 description: "Ed25519 阈值签名的工程复盘：派生路径、域隔离与 Go 实现。"
 categories: ["密码学与安全"]

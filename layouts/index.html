@@ -1,0 +1,11 @@
+{{ define "main" }}
+<section class="page-heading"><p class="eyebrow">THE ENGINEERING JOURNAL</p><h1>工程笔记<span class="title-dot">.</span></h1><p class="lede">记录工作中的实践，也留下研究时的思考。<br>关于钱包、区块链、系统与安全。</p></section>
+{{ $posts := where .Site.RegularPages "Section" "posts" }}
+<div class="home-grid"><div>
+<div class="section-heading"><h2>最近记录</h2><a href="{{ "posts/" | relURL }}">全部文章 ↗</a></div>
+{{ range first 1 $posts.ByDate.Reverse }}
+<article class="featured"><div class="feature-top"><span class="eyebrow">最新文章</span><span class="feature-mark" aria-hidden="true">01 / NOTES</span></div><div class="meta">{{ range .Params.categories }}<span>{{ . }}</span>{{ end }}<span>{{ .Date.Format "2006.01.02" }}</span></div><h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2><p>{{ .Description | default (.Summary | plainify) }}</p><div class="feature-bottom"><span>{{ .ReadingTime }} 分钟阅读</span><a href="{{ .RelPermalink }}">阅读笔记 <span aria-hidden="true">↗</span></a></div></article>
+{{ end }}
+{{ range after 1 $posts.ByDate.Reverse }}{{ partial "post-card.html" . }}{{ end }}
+</div><aside class="home-aside"><section class="notebook"><p class="eyebrow">NOTEBOOK / 2026</p><h2>持续记录，<br>持续探索。</h2><div class="stats"><div><strong>{{ len $posts }}</strong><span>篇笔记</span></div><div><strong>{{ len .Site.Taxonomies.categories }}</strong><span>个主题</span></div></div><p>好记性不如烂笔头，<br>即使是在 AI 时代。</p></section><section class="topics-panel"><h2>按主题阅读</h2>{{ range .Site.Taxonomies.categories.Alphabetical }}<a href="{{ .Page.RelPermalink }}">{{ .Page.Title }}<span>{{ .Count }} ↗</span></a>{{ end }}</section><section class="tags-panel"><h2>关键词</h2><div class="tags">{{ range .Site.Taxonomies.tags.Alphabetical }}<a href="{{ .Page.RelPermalink }}">{{ .Page.Title }}</a>{{ end }}</div></section></aside></div>
+{{ end }}
