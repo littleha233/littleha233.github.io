@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>博客工作台 · Nicola Von</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="/"
+        ><span class="monogram">N<span>·</span></span
+        ><span>Nicola Von<small>博客工作台 / LOCAL STUDIO</small></span></a
+      >
+      <button class="primary wide" id="new">＋ 新建文章</button>
+      <label class="import-button"
+        >导入 Markdown<input
+          id="import"
+          type="file"
+          accept=".md,.markdown,text/markdown"
+      /></label>
+      <div class="section-label">
+        内容库
+        <button id="sync" class="text-button" title="同步远端文章">同步</button>
+      </div>
+      <div class="tabs">
+        <button id="draftTab" class="selected">
+          草稿 <span id="draftCount">0</span></button
+        ><button id="postTab">已发布 <span id="postCount">0</span></button>
+      </div>
+      <label class="sr-only" for="search">搜索文章</label
+      ><input id="search" class="search" placeholder="搜索标题、分类或标签…" />
+      <nav id="library" aria-label="文章列表"></nav>
+      <div class="sidebar-footer">
+        <span class="dot"></span> 仅保存在这台 Mac
+        <p>草稿不会自动上传。<br />每次发布都需要你的确认。</p>
+        <button id="settings" class="text-button">发布连接与帮助 ↗</button>
+      </div>
+    </aside>
+    <main>
+      <header>
+        <div>
+          <span class="eyebrow">WRITE / ORGANIZE / PUBLISH</span>
+          <h1>把思考，整理成文章。</h1>
+        </div>
+        <a
+          href="https://littleha233.github.io/"
+          target="_blank"
+          rel="noreferrer"
+          class="site-link"
+          >查看博客 ↗</a
+        >
+      </header>
+      <div id="message" role="status" aria-live="polite" hidden></div>
+      <section id="welcome" class="welcome">
+        <span class="eyebrow">YOUR NEXT IDEA STARTS HERE</span>
+        <h2>从一份 Markdown 开始</h2>
+        <p>
+          保留你的文字，让排版和发布简单一点。<br />导入文档，整理分类与标签，再用真实
+          Stellar 主题预览。
+        </p>
+        <div class="welcome-steps">
+          <div>
+            <b>01</b><strong>写下内容</strong
+            ><span>导入 Markdown 或直接写作</span>
+          </div>
+          <div>
+            <b>02</b><strong>整理知识</strong
+            ><span>自动提取分类，手动调整标签</span>
+          </div>
+          <div>
+            <b>03</b><strong>预览发布</strong><span>检查通过后，确认上线</span>
+          </div>
+        </div>
+        <button id="start" class="primary">开始第一篇文章 →</button>
+      </section>
+      <section id="workspace" hidden>
+        <div class="article-top">
+          <span id="articleState" class="badge">本地草稿</span
+          ><span id="saveState">尚未保存</span>
+          <div class="top-actions">
+            <button id="export">导出 MD</button
+            ><button id="save">保存草稿</button
+            ><button id="prepare" class="primary">检查并预览 →</button>
+          </div>
+        </div>
+        <label class="sr-only" for="title">文章标题</label
+        ><input
+          id="title"
+          class="title-input"
+          placeholder="给这篇思考起个名字"
+        />
+        <div class="metadata">
+          <label
+            >文章地址
+            <input
+              id="slug"
+              placeholder="my-new-post"
+              spellcheck="false"
+            /><small
+              >/posts/<span id="slugHint">my-new-post</span>/</small
+            ></label
+          ><label
+            >发布时间 · 上海 <input id="date" placeholder="2026-09-15 23:00:00"
+          /></label>
+        </div>
+        <div class="taxonomy">
+          <label
+            >分类
+            <input
+              id="categories"
+              placeholder="如：工程实践"
+              list="categoryOptions"
+            /><small>多个分类用逗号分隔（Stellar 将按层级展示）</small></label
+          ><label
+            >标签
+            <input
+              id="tags"
+              placeholder="如：Git, 自动化, 学习记录"
+              list="tagOptions"
+            /><small>多个标签用逗号分隔，可完全自定义</small></label
+          ><button id="suggest" class="suggest-button">✧ 提取建议</button>
+        </div>
+        <datalist id="categoryOptions"></datalist
+        ><datalist id="tagOptions"></datalist>
+        <div id="suggestions" class="suggestions" hidden>
+          <div><b>内容建议</b><span id="suggestMethod"></span></div>
+          <p id="suggestText"></p>
+          <button id="applySuggest">合并分类 / 标签并补齐摘要</button
+          ><button id="dismissSuggest">暂不采用</button>
+        </div>
+        <label class="summary-label"
+          >摘要
+          <textarea
+            id="description"
+            rows="2"
+            placeholder="用一两句话说明这篇文章值得阅读的地方（也可以自动提取）"
+          ></textarea>
+        </label>
+        <div class="editor-tabs">
+          <button id="editMode" class="selected">Markdown 编辑</button
+          ><button id="previewMode">Stellar 预览</button
+          ><span id="wordCount">0 字</span><button id="format">整理格式</button
+          ><button id="undoFormat" hidden>撤销整理</button>
+        </div>
+        <textarea
+          id="body"
+          class="editor"
+          spellcheck="false"
+          aria-label="Markdown 正文"
+          placeholder="在这里写下你的工作、研究和思考…"
+        ></textarea>
+        <div id="previewPanel" hidden>
+          <div class="preview-bar">
+            <span>独立构建 · 真实主题 · 未公开</span
+            ><a id="previewLink" target="_blank" rel="noreferrer"
+              >独立窗口 ↗</a
+            >
+          </div>
+          <iframe
+            id="preview"
+            title="Stellar 文章预览"
+            sandbox="allow-scripts allow-same-origin"
+            referrerpolicy="no-referrer"
+          ></iframe>
+        </div>
+        <section class="attachments">
+          <div>
+            <h3>图片与附件</h3>
+            <p>
+              支持图片、PDF，每个最大 10 MB。与原文同名的相对链接会自动替换。
+            </p>
+          </div>
+          <label class="import-button small"
+            >＋ 添加附件<input
+              id="attachments"
+              type="file"
+              accept=".png,.jpg,.jpeg,.gif,.webp,.avif,.pdf"
+              multiple
+          /></label>
+          <ul id="assetList"></ul>
+        </section>
+        <section id="release" class="release" hidden>
+          <div>
+            <span class="eyebrow">READY FOR REVIEW</span>
+            <h3>发布前，最后看一眼。</h3>
+            <p>仅提交当前文章与其附件，不包含其他草稿或代码修改。</p>
+          </div>
+          <ul id="fileList"></ul>
+          <p id="warnings"></p>
+          <details>
+            <summary>查看即将提交的 Markdown</summary>
+            <pre id="releaseMarkdown"></pre>
+          </details>
+          <label class="confirm"
+            ><input
+              type="checkbox"
+              id="confirm"
+            />我已检查正文、附件和敏感信息，确认公开发布。</label
+          ><button id="publish" class="primary" disabled>
+            发布到 GitHub Pages ↗
+          </button>
+          <p class="hint">这会提交到公开仓库 main 分支并触发部署。</p>
+        </section>
+      </section>
+      <section id="jobPanel" class="job-panel" hidden>
+        <h3>发布进度</h3>
+        <div id="jobList"></div>
+      </section>
+      <footer>
+        写作属于你，繁琐交给工作台。<span
+          >Markdown · Stellar · GitHub Pages</span
+        >
+      </footer>
+    </main>
+    <dialog id="help">
+      <button id="closeHelp" class="close" aria-label="关闭">×</button
+      ><span class="eyebrow">PUBLISH CONNECTION</span>
+      <h2>连接一次，之后专注写作。</h2>
+      <p id="authState">正在检查…</p>
+      <button id="checkAuth">检查 GitHub 连接</button>
+      <h3>首次使用</h3>
+      <p>在终端运行下面的命令，按提示登录有仓库写权限的 GitHub 账号：</p>
+      <pre>gh auth login</pre>
+      <p>
+        选择 GitHub.com，通过浏览器完成登录。工作台使用系统中的 GitHub CLI
+        凭据，不保存或展示你的令牌。对话中的 GitHub 连接不能代替本机登录。
+      </p>
+      <h3>使用说明</h3>
+      <p>
+        ① 导入 MD，读取 YAML 标题、日期、分类、标签。<br />②
+        点击“提取建议”，确认后合并；也可直接输入。<br />③ 添加原文引用的图片或
+        PDF。<br />④ 保存并检查预览，确认后发布，等待“文章已上线”。
+      </p>
+      <p>
+        草稿存于项目
+        .blog-studio/，不会上传。原有六篇迁移文章只读，可复制为新草稿；新文章可继续编辑并更新。发布记录保留
+        Git 历史，不提供一键删除公网内容。
+      </p>
+      <p>
+        提示：摘要和标签提取在本机完成，采用关键词规则，不是 AI
+        改写。格式整理不润色正文。请自行复核敏感信息；检查器不能保证发现所有秘密。
+      </p>
+    </dialog>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

@@ -8,7 +8,9 @@
   "scripts": {
     "dev": "hexo server --ip 127.0.0.1 --port 1313",
     "build": "hexo clean && hexo generate",
-    "check": "python3 tools/verify-stellar.py"
+    "check": "python3 tools/verify-stellar.py",
+    "studio": "node studio/server.mjs",
+    "test:studio": "node --test studio/test/*.test.mjs"
   },
   "hexo": {
     "version": "8.1.2"
@@ -24,6 +26,7 @@
     "hexo-server": "3.0.0",
     "hexo-theme-stellar": "1.44.0",
     "highlight.js": "11.11.1",
+    "js-yaml": "4.3.2",
     "marked": "13.0.3",
     "vanilla-lazyload": "19.1.3"
   }
