@@ -13,6 +13,6 @@ recent:
 toc:
   layout: toc
   list_number: false
-  min_depth: 2
-  max_depth: 4
+  min_depth: 1
+  max_depth: 6
   collapse: false
