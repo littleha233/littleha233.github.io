@@ -4,6 +4,11 @@
 
 /* Match Stellar's desktop breakpoint; smaller screens keep its drawers. */
 @media screen and (min-width: 1181px) {
+  /* Keep index/archive navigation as wide as content-page navigation. */
+  .l_body > .l_left {
+    width: 248px;
+  }
+
   .l_body.reading-layout {
     box-sizing: border-box;
     width: 100%;

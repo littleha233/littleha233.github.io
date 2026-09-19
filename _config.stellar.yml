@@ -12,10 +12,6 @@ menubar:
       icon: default:calendar
       title: 归档
       url: /archives/
-    - id: writing
-      icon: default:documents
-      title: 写作
-      url: /writing/
     - id: about
       icon: default:shield-user
       title: 关于
