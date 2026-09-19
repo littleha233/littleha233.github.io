@@ -1,5 +1,5 @@
 ---
-title: 量子计算 Lesson 3：量子傅里叶变换
+title: 量子计算3：量子傅里叶变换
 date: '2026-09-20 03:55:11'
 description: ''
 categories:
