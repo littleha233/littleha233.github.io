@@ -1,5 +1,5 @@
 ---
-title: 量子计算4：Shor Algorithm——从周期寻找破解 RSA
+title: 量子计算4：Shor Algorithm 从周期寻找破解 RSA
 date: '2026-09-20 04:32:46'
 description: ''
 categories:
