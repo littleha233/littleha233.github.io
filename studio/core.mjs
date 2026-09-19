@@ -1,5 +1,10 @@
 import yaml from "js-yaml";
 import { createHash } from "node:crypto";
+import { marked } from "marked";
+
+function sourceFooter(source) {
+  return source ? `\n\n---\n\n来源：[原始资料](<${source}>)\n` : "";
+}
 
 export const hash = (value) => createHash("sha256").update(value).digest("hex");
 export const list = (value) =>
@@ -40,6 +45,9 @@ export function parseMarkdown(raw, filename = "新文章.md") {
       throw new Error("文章信息区必须是 YAML 对象");
     body = raw.slice(end + 4).replace(/^\n/, "");
   }
+  const source = String(meta.source_url || "");
+  if (source && body.endsWith(sourceFooter(source)))
+    body = body.slice(0, -sourceFooter(source).length);
   return {
     title: String(
       meta.title ||
@@ -53,6 +61,8 @@ export function parseMarkdown(raw, filename = "新文章.md") {
     description: String(meta.description || meta.excerpt || ""),
     categories: list(meta.categories || meta.category),
     tags: list(meta.tags),
+    contentType: String(meta.content_type || "article"),
+    source,
     body,
   };
 }
@@ -84,22 +94,52 @@ export function validate(doc) {
   if (!doc.body.trim() || Buffer.byteLength(doc.body) > 1024 * 1024)
     throw new Error("正文不能为空，且不能超过 1 MB");
   if (doc.description.length > 600) throw new Error("摘要最多 600 字");
-  // Imported Markdown is content, never a Hexo template with access to local files.
-  if (/\{%|\{\{/.test(doc.body))
-    throw new Error(
-      "为保护本地文件，第一版不执行 Hexo 模板标签（{% 或 {{）；请改用普通 Markdown",
-    );
-  if (
-    /<\s*(script|iframe|object|embed|form)\b|\son\w+\s*=|javascript\s*:/i.test(
-      doc.body,
+  const contentType = doc.contentType || "article";
+  if (!["article", "snippet", "conversation"].includes(contentType))
+    throw new Error("无效内容类型");
+  let source = doc.source || "";
+  if (typeof source !== "string" || source.length > 2048)
+    throw new Error("来源链接格式错误或过长");
+  if (source) {
+    let parsed;
+    try {
+      parsed = new URL(source);
+    } catch {
+      throw new Error("来源必须是完整的 HTTP(S) 链接");
+    }
+    if (
+      !["https:", "http:"].includes(parsed.protocol) ||
+      parsed.username ||
+      parsed.password
     )
-  )
-    throw new Error("请移除脚本、表单、iframe 或事件属性后再预览");
+      throw new Error("来源链接不能包含账号密码，且必须使用 HTTP(S)");
+    source = parsed.href;
+  }
+  // Inspect rendered Markdown tokens, not examples inside fenced/inline code.
+  marked.walkTokens(marked.lexer(doc.body), (token) => {
+    if (
+      token.type === "html" &&
+      /<\s*(script|iframe|object|embed|form|svg|math|style|link|meta|base)\b|\son\w+\s*=|javascript\s*:/i.test(
+        token.raw,
+      )
+    )
+      throw new Error("HTML 示例请放入代码块，不能在正文执行脚本或嵌入页面");
+    if (["link", "image"].includes(token.type)) {
+      const href = token.href.replace(/[\s\u0000-\u001f]+/g, "");
+      if (
+        /^[a-z][a-z0-9+.-]*:/i.test(href) &&
+        !/^(https?:|mailto:|tel:)/i.test(href)
+      )
+        throw new Error("链接包含不安全协议");
+    }
+  });
   return {
     ...doc,
     title: doc.title.trim(),
     categories: list(doc.categories),
     tags: list(doc.tags),
+    contentType,
+    source,
   };
 }
 export function serialize(doc) {
@@ -112,13 +152,24 @@ export function serialize(doc) {
         date: doc.date,
         description: doc.description,
         categories: doc.categories,
-        tags: doc.tags,
+        tags:
+          doc.contentType === "article"
+            ? doc.tags
+            : list([
+                doc.contentType === "snippet" ? "代码片段" : "对话摘录",
+                ...doc.tags,
+              ]),
+        content_type: doc.contentType,
+        source_url: doc.source || undefined,
+        // Literal examples (including {{ }} and {% %}) must never execute as templates.
+        disableNunjucks: true,
       },
       { lineWidth: -1, noRefs: true },
     ) +
     "---\n\n" +
     doc.body.trim() +
-    "\n"
+    "\n" +
+    sourceFooter(doc.source)
   );
 }
 export function formatMarkdown(body) {
@@ -146,6 +197,9 @@ export function formatMarkdown(body) {
   );
 }
 const topics = [
+  ["生活随记", ["生活", "旅行", "随笔", "日常", "摄影", "散步", "美食"]],
+  ["阅读与思考", ["读书", "阅读", "书评", "思考", "哲学", "认知", "心理"]],
+  ["学习记录", ["学习", "课程", "笔记", "英语", "数学", "练习"]],
   [
     "区块链研究",
     [
@@ -200,6 +254,15 @@ const knownTags = [
   "Stellar",
   "DeFi",
   "Solidity",
+  "阅读",
+  "生活",
+  "旅行",
+  "摄影",
+  "思考",
+  "写作",
+  "GPT",
+  "ChatGPT",
+  "AI",
 ];
 function score(text, term) {
   const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -247,15 +310,24 @@ export function suggest(doc, taxonomy = { categories: [], tags: [] }) {
 }
 export function warnings(doc) {
   const items = [];
+  const visibleContent = [doc.title, doc.description, doc.body, doc.source]
+    .filter(Boolean)
+    .join("\n");
+  if (doc.contentType === "conversation")
+    items.push(
+      "对话将公开：请删除姓名、联系方式、内部资料和不希望公开的发言；AI 回答不代表已验证结论",
+    );
+  if (doc.source)
+    items.push("来源链接也会公开，请检查是否包含私密分享标识或敏感参数");
   if (
     /-----BEGIN .*PRIVATE KEY-----|\b(?:ghp_|github_pat_|sk-proj-)[A-Za-z0-9_]{16,}/.test(
-      doc.body,
+      visibleContent,
     )
   )
     items.push("检测到可能的私钥或访问令牌，请删除后发布");
   if (
     /\b(?:password|secret|api_key|token)\s*[:=]\s*["'][^"']{8,}["']/i.test(
-      doc.body,
+      visibleContent,
     )
   )
     items.push("疑似包含密码或密钥赋值，请人工检查");

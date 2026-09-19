@@ -1,3 +1,82 @@
+.capture-button {
+  margin-top: 9px;
+  background: #e6ecdf;
+  font-size: 12px;
+}
+.type-filter {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 8px;
+}
+.content-metadata {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 16px;
+  margin-top: 20px;
+}
+.content-metadata label,
+.capture-dialog label {
+  font-size: 11px;
+  display: block;
+}
+.content-metadata input,
+.content-metadata select,
+.capture-dialog input,
+.capture-dialog select,
+.capture-dialog textarea,
+.type-filter {
+  border: 1px solid var(--line);
+  background: #fffefa;
+  color: var(--ink);
+  border-radius: 6px;
+  font: inherit;
+}
+.content-metadata input,
+.content-metadata select,
+.capture-dialog input,
+.capture-dialog select {
+  width: 100%;
+  display: block;
+  padding: 10px;
+  margin-top: 7px;
+}
+.type-hint {
+  font-size: 11px;
+  line-height: 1.8;
+  color: var(--muted);
+  margin-bottom: 0;
+}
+.capture-dialog {
+  max-width: 780px;
+  max-height: 88vh;
+  overflow-y: auto;
+}
+.capture-dialog textarea {
+  width: 100%;
+  padding: 14px;
+  margin: 8px 0 14px;
+  resize: vertical;
+  font:
+    12px/1.8 ui-monospace,
+    monospace;
+}
+#conversationPicker {
+  margin-bottom: 16px;
+}
+#captureError {
+  color: #913e29;
+  background: #f7e8df;
+  padding: 12px;
+  border-radius: 6px;
+}
+@media (max-width: 700px) {
+  .content-metadata {
+    grid-template-columns: 1fr;
+  }
+  .sidebar > .capture-button {
+    width: 100%;
+  }
+}
 :root {
   --ink: #27372f;
   --muted: #7c867e;

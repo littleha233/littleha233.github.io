@@ -13,12 +13,13 @@
         ><span class="monogram">N<span>·</span></span
         ><span>Nicola Von<small>博客工作台 / LOCAL STUDIO</small></span></a
       >
-      <button class="primary wide" id="new">＋ 新建文章</button>
+      <button class="primary wide" id="new">＋ 新建内容</button>
+      <button class="wide capture-button" id="capture">粘贴代码 / 对话</button>
       <label class="import-button"
-        >导入 Markdown<input
+        >导入文档 / 代码 / JSON<input
           id="import"
           type="file"
-          accept=".md,.markdown,text/markdown"
+          accept=".md,.markdown,.txt,.json,.js,.mjs,.ts,.tsx,.jsx,.py,.go,.rs,.java,.sh,.zsh,.sql,.html,.css,.yaml,.yml,.toml,.xml,.c,.h,.cpp,.cs,.rb,.php,.swift,.kt,.r,.vue"
       /></label>
       <div class="section-label">
         内容库
@@ -31,6 +32,13 @@
       </div>
       <label class="sr-only" for="search">搜索文章</label
       ><input id="search" class="search" placeholder="搜索标题、分类或标签…" />
+      <label class="sr-only" for="typeFilter">筛选内容类型</label>
+      <select id="typeFilter" class="type-filter">
+        <option value="">全部内容</option>
+        <option value="article">文章</option>
+        <option value="snippet">代码片段</option>
+        <option value="conversation">对话摘录</option>
+      </select>
       <nav id="library" aria-label="文章列表"></nav>
       <div class="sidebar-footer">
         <span class="dot"></span> 仅保存在这台 Mac
@@ -42,7 +50,7 @@
       <header>
         <div>
           <span class="eyebrow">WRITE / ORGANIZE / PUBLISH</span>
-          <h1>把思考，整理成文章。</h1>
+          <h1>让值得留下的，都有归处。</h1>
         </div>
         <a
           href="https://littleha233.github.io/"
@@ -55,15 +63,15 @@
       <div id="message" role="status" aria-live="polite" hidden></div>
       <section id="welcome" class="welcome">
         <span class="eyebrow">YOUR NEXT IDEA STARTS HERE</span>
-        <h2>从一份 Markdown 开始</h2>
+        <h2>文章、代码，还有启发你的对话。</h2>
         <p>
-          保留你的文字，让排版和发布简单一点。<br />导入文档，整理分类与标签，再用真实
+          从一段文字、一份代码或一次有价值的问答开始。<br />整理分类与标签，再用真实
           Stellar 主题预览。
         </p>
         <div class="welcome-steps">
           <div>
             <b>01</b><strong>写下内容</strong
-            ><span>导入 Markdown 或直接写作</span>
+            ><span>导入文件，或粘贴代码和问答</span>
           </div>
           <div>
             <b>02</b><strong>整理知识</strong
@@ -85,6 +93,22 @@
             ><button id="prepare" class="primary">检查并预览 →</button>
           </div>
         </div>
+        <div class="content-metadata">
+          <label
+            >内容类型<select id="contentType">
+              <option value="article">文章 / 随记</option>
+              <option value="snippet">代码片段</option>
+              <option value="conversation">对话摘录</option>
+            </select></label
+          >
+          <label
+            >来源链接（可选，将公开）<input
+              id="source"
+              type="url"
+              placeholder="https://…"
+          /></label>
+        </div>
+        <p id="typeHint" class="type-hint"></p>
         <label class="sr-only" for="title">文章标题</label
         ><input
           id="title"
@@ -242,6 +266,67 @@
         提示：摘要和标签提取在本机完成，采用关键词规则，不是 AI
         改写。格式整理不润色正文。请自行复核敏感信息；检查器不能保证发现所有秘密。
       </p>
+    </dialog>
+    <dialog id="captureDialog" class="capture-dialog">
+      <button id="closeCapture" class="close" aria-label="关闭内容导入">
+        ×
+      </button>
+      <span class="eyebrow">CAPTURE WHAT MATTERS</span>
+      <h2>留下一段有价值的内容</h2>
+      <p>只在本机处理，转换为可编辑的 Markdown 草稿，不会立即发布。</p>
+      <div class="content-metadata">
+        <label
+          >导入方式<select id="captureMode">
+            <option value="article">文章 / Markdown / 随记</option>
+            <option value="snippet">代码片段</option>
+            <option value="conversation-text">对话文本</option>
+            <option value="conversation-json">对话 JSON</option>
+          </select></label
+        >
+        <label
+          >标题（可选）<input
+            id="captureTitle"
+            placeholder="为这段内容起个名字"
+        /></label>
+      </div>
+      <label id="languageLabel"
+        >代码语言<input
+          id="captureLanguage"
+          list="languageOptions"
+          value="text"
+          placeholder="python / javascript / go / text"
+      /></label>
+      <datalist id="languageOptions">
+        <option value="python"></option>
+        <option value="javascript"></option>
+        <option value="typescript"></option>
+        <option value="go"></option>
+        <option value="java"></option>
+        <option value="rust"></option>
+        <option value="bash"></option>
+        <option value="sql"></option>
+        <option value="html"></option>
+        <option value="json"></option>
+        <option value="text"></option>
+      </datalist>
+      <p id="captureHint"></p>
+      <label for="captureText">原始内容</label
+      ><textarea
+        id="captureText"
+        rows="12"
+        spellcheck="false"
+        placeholder="粘贴 Markdown、代码，或带有“我： / GPT：”标记的问答"
+      ></textarea>
+      <div id="conversationPicker" hidden>
+        <button id="listConversations">读取对话目录（不保存草稿）</button
+        ><label
+          >只导入这一段对话<select id="conversationChoice">
+            <option value="">请先读取目录并选择</option>
+          </select></label
+        >
+      </div>
+      <p id="captureError" role="alert" hidden></p>
+      <button id="createCapture" class="primary">生成本地草稿 →</button>
     </dialog>
     <script type="module" src="/app.js"></script>
   </body>

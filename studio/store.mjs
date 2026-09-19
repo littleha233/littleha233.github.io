@@ -18,9 +18,13 @@ export class DraftStore {
     });
   }
   async get(id) {
-    return JSON.parse(
-      await fs.readFile(path.join(this.folder(id), "draft.json"), "utf8"),
-    );
+    return {
+      contentType: "article",
+      source: "",
+      ...JSON.parse(
+        await fs.readFile(path.join(this.folder(id), "draft.json"), "utf8"),
+      ),
+    };
   }
   async all() {
     await this.init();
@@ -50,6 +54,8 @@ export class DraftStore {
       categories: doc.categories,
       tags: doc.tags,
       body: doc.body,
+      contentType: doc.contentType,
+      source: doc.source,
       id: randomUUID(),
       version: 1,
       updated: new Date().toISOString(),
@@ -75,6 +81,8 @@ export class DraftStore {
           "categories",
           "tags",
           "body",
+          "contentType",
+          "source",
         ].map((k) => [k, doc[k]]),
       ),
       version: old.version + 1,

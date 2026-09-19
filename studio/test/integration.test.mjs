@@ -9,6 +9,7 @@ import { DraftStore } from "../store.mjs";
 import { Publisher } from "../publisher.mjs";
 import { parseMarkdown } from "../core.mjs";
 import { start } from "../server.mjs";
+import { importContent } from "../content.mjs";
 const root = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../..",
@@ -178,8 +179,104 @@ test("localhost API blocks cross-origin/unauthenticated calls, save and export",
       }),
     });
     assert.equal(assets.status, 400);
+    const conversations = JSON.stringify([
+      {
+        title: "选择的对话",
+        messages: [
+          { role: "user", content: "你好" },
+          { role: "assistant", content: "回答" },
+        ],
+      },
+      {
+        title: "未选择的对话",
+        messages: [{ role: "user", content: "不导入" }],
+      },
+    ]);
+    const choices = await (
+      await fetch(base + "/api/import-choices", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ raw: conversations }),
+      })
+    ).json();
+    assert.equal(choices.choices.length, 2);
+    assert.equal((await app.store.all()).length, 1);
+    const chat = await (
+      await fetch(base + "/api/import", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          raw: conversations,
+          filename: "chat.json",
+          conversationIndex: 0,
+        }),
+      })
+    ).json();
+    assert.equal(chat.contentType, "conversation");
+    assert.ok(!chat.body.includes("不导入"));
+    const saved = await (
+      await fetch(base + "/api/save", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          ...chat,
+          source: "https://example.com/conversation",
+        }),
+      })
+    ).json();
+    assert.equal(saved.source, "https://example.com/conversation");
+    assert.equal(saved.contentType, "conversation");
   } finally {
     if (app) await app.close();
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("generic content renders in Stellar without executing literal templates", async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "studio-generic-test-"));
+  const store = new DraftStore(dir);
+  await store.init();
+  const publisher = new Publisher(root, store);
+  await publisher.init();
+  try {
+    const legacy = await store.create(parseMarkdown("旧草稿", "old-draft.md"));
+    const oldRecord = { ...legacy };
+    delete oldRecord.contentType;
+    delete oldRecord.source;
+    await store.write(oldRecord);
+    assert.equal((await store.get(legacy.id)).contentType, "article");
+    for (const [mode, filename, raw] of [
+      [
+        "snippet",
+        "studio-literal.html",
+        '<script>alert("example")</script>\n{{ config.title }}\n{% include /etc/passwd %}',
+      ],
+      [
+        "conversation-text",
+        "studio-dialogue.md",
+        "我：读书笔记如何记录？\nGPT：写下自己的理解。",
+      ],
+    ]) {
+      const doc = importContent({ mode, filename, raw }).doc;
+      doc.source = "https://example.com/reference";
+      const draft = await store.create(doc);
+      const result = await publisher.prepare(draft.id);
+      const p = publisher.previews.get(result.key);
+      const html = await fs.readFile(
+        path.join(p.dir, "public/posts", draft.slug, "index.html"),
+        "utf8",
+      );
+      assert.match(html, /Stellar/);
+      assert.match(html, /原始资料/);
+      assert.match(result.after, /disableNunjucks: true/);
+      if (mode === "snippet") {
+        assert.match(html, /config\.title/);
+        assert.ok(!html.includes('<script>alert("example")</script>'));
+      } else assert.match(html, /GPT/);
+    }
+  } finally {
+    for (const p of publisher.previews.values())
+      await fs.rm(p.dir, { recursive: true, force: true });
     await fs.rm(dir, { recursive: true, force: true });
   }
 });

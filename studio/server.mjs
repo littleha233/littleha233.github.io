@@ -5,13 +5,8 @@ import { fileURLToPath } from "node:url";
 import { randomBytes } from "node:crypto";
 import { DraftStore } from "./store.mjs";
 import { Publisher, authentication, REPO, SITE } from "./publisher.mjs";
-import {
-  parseMarkdown,
-  suggest,
-  formatMarkdown,
-  serialize,
-  dateNow,
-} from "./core.mjs";
+import { importContent, conversationChoices } from "./content.mjs";
+import { suggest, formatMarkdown, serialize, dateNow } from "./core.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const MIME = {
@@ -122,8 +117,15 @@ export async function start({
           if (req.method !== "POST") throw new Error("接口不存在");
           const body = await jsonBody(req);
           switch (url.pathname) {
-            case "/api/import":
-              return store.create(parseMarkdown(body.raw, body.filename));
+            case "/api/import": {
+              const imported = importContent(body);
+              return {
+                ...(await store.create(imported.doc)),
+                importNotes: imported.notes,
+              };
+            }
+            case "/api/import-choices":
+              return { choices: conversationChoices(body.raw) };
             case "/api/save":
               return store.save(body.id, body);
             case "/api/attach":

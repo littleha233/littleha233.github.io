@@ -55,5 +55,5 @@ npm run check
 # 本地博客工作台
 
 现在可以双击 `启动博客工作台.command`，或运行 `npm run studio`，访问 http://127.0.0.1:4313/。
-支持 Markdown 导入编辑、分类标签建议与手填、附件、自动保存、Stellar 预览及确认发布。
+支持文章/生活随记、代码片段、GPT 对话摘录，提供文件与粘贴导入、分类标签建议与手填、附件、自动保存、Stellar 预览及确认发布。
 首次发布先执行 `gh auth login`。[完整使用说明](docs/BLOG-STUDIO.md)。

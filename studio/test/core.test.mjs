@@ -32,13 +32,21 @@ test("metadata missing, Chinese names, scalar and list taxonomy", () => {
 });
 test("malformed metadata and dangerous Markdown rejected", () => {
   assert.throws(() => parseMarkdown("---\ntitle: foo"));
-  for (const body of [
-    "{% include /etc/passwd %}",
-    "<script>alert(1)</script>",
-    '<img onerror="x">',
-  ])
+  for (const body of ["<script>alert(1)</script>", '<img onerror="x">'])
     assert.throws(() => validate({ ...parseMarkdown(raw), body }));
   assert.throws(() => validate({ ...parseMarkdown(raw), slug: "../secret" }));
+});
+test("template syntax is literal and code examples are not executable HTML", () => {
+  const doc = {
+    ...parseMarkdown(raw),
+    body: "```html\n<script>alert(1)</script>\n{{ config.secret }}\n{% include /etc/passwd %}\n```",
+  };
+  assert.doesNotThrow(() => validate(doc));
+  assert.match(serialize(doc), /disableNunjucks: true/);
+  assert.throws(
+    () => validate({ ...doc, body: "[run](javascript:alert)" }),
+    /不安全/,
+  );
 });
 test("suggestions match local knowledge, do not mutate manual taxonomy", () => {
   const d = parseMarkdown(raw);
