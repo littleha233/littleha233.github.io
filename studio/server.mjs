@@ -54,7 +54,7 @@ function json(res, value, status = 200) {
   });
   res.end(JSON.stringify(value));
 }
-async function serve(res, base, pathname) {
+async function serve(res, base, pathname, preview = false) {
   let file = path.resolve(base, "." + decodeURIComponent(pathname));
   if (file !== base && !file.startsWith(base + path.sep))
     throw new Error("非法路径");
@@ -62,11 +62,23 @@ async function serve(res, base, pathname) {
   const real = await fs.realpath(file);
   if (!real.startsWith((await fs.realpath(base)) + path.sep))
     throw new Error("非法链接");
+  let bytes = await fs.readFile(file);
+  // Avoid full-document transition snapshots when replacing long iframe pages.
+  // This affects local previews only, never the generated/public blog files.
+  if (preview && path.extname(file) === ".html")
+    bytes = Buffer.from(
+      bytes
+        .toString("utf8")
+        .replace(
+          "</head>",
+          "<style>@view-transition{navigation:none}</style></head>",
+        ),
+    );
   res.writeHead(200, {
     "Content-Type": MIME[path.extname(file)] || "application/octet-stream",
     "Cache-Control": "no-store",
   });
-  res.end(await fs.readFile(file));
+  res.end(bytes);
 }
 export async function start({
   root = ROOT,
@@ -155,8 +167,20 @@ export async function start({
               });
               return {
                 ...result,
-                url: `http://127.0.0.1:${previewPort}/p/${result.key}/posts/${result.slug}/`,
+                url: `http://127.0.0.1:${previewPort}/p/${result.key}/${result.display.path}`,
+                fullUrl: `http://127.0.0.1:${previewPort}/p/${result.key}/posts/${result.slug}/`,
               };
+            }
+            case "/api/preview-event": {
+              if (
+                !["load", "error", "timeout", "unload"].includes(body.event) ||
+                !publisher.previews.has(body.key)
+              )
+                throw new Error("无效预览事件");
+              await publisher.diagnostic("frame-" + body.event, {
+                key: body.key,
+              });
+              return { ok: true };
             }
             case "/api/publish":
               return publisher.publish(body.key, body.confirmed === true);
@@ -177,6 +201,10 @@ export async function start({
         url.pathname === "/" ? "/index.html" : url.pathname,
       );
     } catch (error) {
+      if (res.destroyed || res.headersSent) {
+        res.destroy();
+        return;
+      }
       json(
         res,
         { error: error.code === "ENOENT" ? "文件不存在" : error.message },
@@ -206,8 +234,12 @@ export async function start({
       const match = url.pathname.match(/^\/p\/([a-f0-9-]{36})(\/.*)$/);
       const p = match && publisher.previews.get(match[1]);
       if (!p) throw new Error("请先生成预览");
-      await serve(res, path.join(p.dir, "public"), match[2]);
+      await serve(res, path.join(p.dir, "public"), match[2], true);
     } catch {
+      if (res.destroyed || res.headersSent) {
+        res.destroy();
+        return;
+      }
       res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
       res.end("预览不存在或已过期，请回到编辑器重新生成");
     }

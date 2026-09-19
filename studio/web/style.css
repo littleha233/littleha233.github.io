@@ -523,6 +523,8 @@ textarea {
 }
 .preview-bar {
   display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   justify-content: space-between;
   padding: 12px 0;
   color: var(--muted);

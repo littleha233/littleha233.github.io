@@ -107,7 +107,9 @@ function counters() {
         : "适合技术文章、生活随记、阅读笔记等。分类和标签由你决定。";
 }
 function invalidate() {
+  unloadPreview();
   state.prepared = null;
+  $("releaseMarkdown").textContent = "";
   $("release").hidden = true;
   $("confirm").checked = false;
   $("publish").disabled = true;
@@ -119,7 +121,11 @@ function changed() {
   invalidate();
   counters();
   $("saveState").textContent = "待保存";
-  localStorage.setItem("studio-recovery", JSON.stringify(read()));
+  try {
+    localStorage.setItem("studio-recovery", JSON.stringify(read()));
+  } catch {
+    $("saveState").textContent = "浏览器恢复备份不可用 · 正在保存到本机";
+  }
   clearTimeout(timer);
   timer = setTimeout(
     () =>
@@ -147,7 +153,9 @@ async function save() {
     state.drafts.unshift(result);
     renderLibrary();
     if (state.revision === revision) {
-      localStorage.removeItem("studio-recovery");
+      try {
+        localStorage.removeItem("studio-recovery");
+      } catch {}
       $("saveState").textContent = "已自动保存";
     }
     return result;
@@ -336,19 +344,66 @@ function renderAssets() {
   }
 }
 function showMode(preview) {
+  if (!preview) unloadPreview();
   $("body").hidden = preview;
   $("previewPanel").hidden = !preview;
   $("editMode").classList.toggle("selected", !preview);
   $("previewMode").classList.toggle("selected", preview);
 }
+let previewTimer;
+let activePreviewKey = null;
+function previewEvent(event, key = activePreviewKey) {
+  if (key) api("preview-event", { key, event }).catch(() => {});
+}
+function unloadPreview() {
+  clearTimeout(previewTimer);
+  previewEvent("unload");
+  activePreviewKey = null;
+  $("preview").removeAttribute("src");
+}
+function loadPreview() {
+  const p = state.prepared;
+  if (!p) return;
+  unloadPreview();
+  activePreviewKey = p.key;
+  $("previewStatus").textContent = "正在加载预览…";
+  $("preview").src = p.url;
+  previewTimer = setTimeout(() => {
+    previewEvent("timeout");
+    unloadPreview();
+    $("previewStatus").textContent =
+      "预览加载超时，已释放页面；草稿仍在，可重新加载或打开完整主题预览。";
+  }, 20000);
+}
+$("preview").addEventListener("load", () => {
+  if (!activePreviewKey) return;
+  clearTimeout(previewTimer);
+  previewEvent("load");
+  const pages = state.prepared?.display?.pages || 1;
+  $("previewStatus").textContent =
+    pages > 1
+      ? `长文分段预览 · 共 ${pages} 段 · 发布仍为完整文章`
+      : "独立构建 · 真实主题 · 未公开";
+});
+$("preview").addEventListener("error", () => {
+  previewEvent("error");
+  unloadPreview();
+  $("previewStatus").textContent = "预览加载失败，草稿仍在，请重新加载。";
+});
+bind("reloadPreview", loadPreview);
 async function prepare() {
   await save();
+  invalidate();
+  showMode(false);
   message("正在隔离构建并检查文章、附件与内部链接…");
   const p = await api("prepare", { id: state.current.id, sync: true });
   state.prepared = p;
-  $("preview").src = p.url;
-  $("previewLink").href = p.url;
+  $("previewLink").href = p.fullUrl || p.url;
   showMode(true);
+  if (p.display?.autoLoad !== false) loadPreview();
+  else
+    $("previewStatus").textContent =
+      "单个公式、代码块或表格过大，已暂停自动加载。可选择重新加载或打开完整主题预览。";
   $("release").hidden = false;
   $("fileList").replaceChildren(
     ...p.files.map((f) =>
@@ -606,8 +661,10 @@ $("attachments").onchange = () =>
 bind("prepare", prepare);
 bind("editMode", () => showMode(false));
 bind("previewMode", async () => {
-  if (state.prepared) showMode(true);
-  else await prepare();
+  if (state.prepared) {
+    showMode(true);
+    loadPreview();
+  } else await prepare();
 });
 $("confirm").onchange = () => {
   $("publish").disabled = !$("confirm").checked || !state.prepared;
@@ -708,7 +765,10 @@ async function boot() {
   const boot = await r.json();
   state.csrf = boot.csrf;
   await refresh();
-  const raw = localStorage.getItem("studio-recovery");
+  let raw;
+  try {
+    raw = localStorage.getItem("studio-recovery");
+  } catch {}
   if (raw) {
     try {
       const backup = JSON.parse(raw);
