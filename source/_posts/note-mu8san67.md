@@ -1,5 +1,5 @@
 ---
-title: 量子计算 Lesson 1：从经典 bit 到 qubit
+title: 量子计算1：从经典 bit 到 qubit
 date: '2026-09-20 03:39:28'
 description: ''
 categories:
