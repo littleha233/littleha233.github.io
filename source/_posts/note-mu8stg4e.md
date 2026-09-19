@@ -1,5 +1,5 @@
 ---
-title: 量子计算Lesson 2：叠加、相位、干涉与纠缠
+title: 量子计算2：叠加、相位、干涉与纠缠
 date: '2026-09-20 03:47:17'
 description: ''
 categories:
