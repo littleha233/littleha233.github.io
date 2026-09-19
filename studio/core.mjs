@@ -64,6 +64,7 @@ export function parseMarkdown(raw, filename = "新文章.md") {
     contentType: String(meta.content_type || "article"),
     source,
     body,
+    originalMeta: meta,
   };
 }
 export function slugify(value) {
@@ -148,6 +149,7 @@ export function serialize(doc) {
     "---\n" +
     yaml.dump(
       {
+        ...(doc.originalMeta || {}),
         title: doc.title,
         date: doc.date,
         description: doc.description,

@@ -851,3 +851,14 @@ dialog h3 {
     gap: 8px;
   }
 }
+.danger {
+  color: #a63232;
+}
+#deleteBefore {
+  max-height: 240px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+#deleteError {
+  color: #a63232;
+}

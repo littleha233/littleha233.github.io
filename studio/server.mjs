@@ -117,6 +117,12 @@ export async function start({
           if (req.method !== "POST") throw new Error("接口不存在");
           const body = await jsonBody(req);
           switch (url.pathname) {
+            case "/api/edit-post":
+              return publisher.editPost(body.path, body.contentHash);
+            case "/api/prepare-delete":
+              return publisher.prepareDelete(body.path, body.contentHash);
+            case "/api/delete-post":
+              return publisher.deletePost(body.key, body.slug, body.confirmed);
             case "/api/import": {
               const imported = importContent(body);
               return {

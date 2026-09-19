@@ -209,7 +209,9 @@
           <div>
             <span class="eyebrow">READY FOR REVIEW</span>
             <h3>发布前，最后看一眼。</h3>
-            <p>仅提交当前文章与其附件，不包含其他草稿或代码修改。</p>
+            <p>
+              仅提交清单中的当前文章、附件及必要的文章管理检查文件，不包含其他草稿或无关代码修改。
+            </p>
           </div>
           <ul id="fileList"></ul>
           <p id="warnings"></p>
@@ -259,13 +261,44 @@
       </p>
       <p>
         草稿存于项目
-        .blog-studio/，不会上传。原有六篇迁移文章只读，可复制为新草稿；新文章可继续编辑并更新。发布记录保留
-        Git 历史，不提供一键删除公网内容。
+        .blog-studio/，不会上传。在“已发布”列表点击文章即可编辑原文，保存不会立即上线。
+        点击“删除文章”并完成确认后才会移除线上正文，原链接显示删除提示。 Git
+        历史、迁移归档和附件仍保留；删除不适用于彻底清除敏感数据。
       </p>
       <p>
         提示：摘要和标签提取在本机完成，采用关键词规则，不是 AI
         改写。格式整理不润色正文。请自行复核敏感信息；检查器不能保证发现所有秘密。
       </p>
+    </dialog>
+    <dialog id="deleteDialog" class="capture-dialog">
+      <button id="closeDelete" class="close" aria-label="取消删除">×</button>
+      <h2>确认删除已发布文章</h2>
+      <h3 id="deleteTitle"></h3>
+      <p>
+        将从首页、归档和搜索中移除文章，旧链接显示“文章已移除”。附件、迁移原稿、Git
+        历史和本地草稿保留，可通过历史提交恢复；这不是彻底清除数据。
+      </p>
+      <p>
+        下面是完整提交清单，必要时包含迁移保护记录及构建检查器更新。确认后将提交至公开仓库
+        main 并触发部署。
+      </p>
+      <ul id="deleteFiles"></ul>
+      <details>
+        <summary>查看将删除的原文（可复制备份）</summary>
+        <pre id="deleteBefore"></pre>
+      </details>
+      <label
+        >请输入文章地址：<strong id="deleteSlugHint"></strong
+        ><input id="deleteSlug" autocomplete="off" spellcheck="false"
+      /></label>
+      <label class="confirm"
+        ><input
+          id="confirmDelete"
+          type="checkbox"
+        />我确认移除这篇文章，并了解历史记录及附件仍会保留。</label
+      >
+      <p id="deleteError" role="alert" hidden></p>
+      <button id="deleteSubmit" class="danger" disabled>确认删除并部署</button>
     </dialog>
     <dialog id="captureDialog" class="capture-dialog">
       <button id="closeCapture" class="close" aria-label="关闭内容导入">

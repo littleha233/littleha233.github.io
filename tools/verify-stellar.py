@@ -32,31 +32,51 @@ class Page(HTMLParser):
                 self.links.append(attrs[attr])
 
 posts = ['init-blog', 'blog-create-process', 'eddsa_mpc', 'blockchain-cloud', 'blockchain-mpc', 'normal-algorithm']
+history_file = root / 'source/_data/studio-history.json'
+history = json.loads(history_file.read_text()) if history_file.exists() else {}
+require(isinstance(history, dict) and set(history).issubset(posts), 'Invalid historical management record')
+deleted = {slug for slug, entry in history.items() if entry.get('deleted') is True}
+active_posts = [slug for slug in posts if slug not in deleted]
 for slug in posts:
     old = (root / f'content/posts/{slug}.md').read_bytes()
+    if slug in deleted:
+        require(not (root / f'source/_posts/{slug}.md').exists(), f'Deleted article still exists: {slug}')
+        target = public / f'posts/{slug}/index.html'
+        require(target.exists() and 'id="studio-removed"' in target.read_text(), f'Missing removal notice: {slug}')
+        continue
     migrated = (root / f'source/_posts/{slug}.md').read_bytes()
     expected = re.sub(rb'(?m)^date: ([0-9-]+)T([0-9:]+)\+08:00$', rb'date: \1 \2', old)
-    require(expected == migrated, f'Migration differs: {slug}')
+    if slug in history:
+        require(history[slug].get('contentHash') == hashlib.sha256(migrated).hexdigest(), f'Managed article differs: {slug}')
+    else:
+        require(expected == migrated, f'Migration differs: {slug}')
     target = public / f'posts/{slug}/index.html'
     require(target.exists(), f'Missing article: {slug}')
     if target.exists():
         html = target.read_text()
         require('Stellar' in html and '/css/main.css' in html, f'Wrong theme: {slug}')
         original_date = re.search(rb'(?m)^date: ([0-9-]+)', old)[1].decode()
-        require(re.search(r'<time[^>]*>' + original_date + r'</time>', html), f'Display date changed: {slug}')
+        if slug not in history:
+            require(re.search(r'<time[^>]*>' + original_date + r'</time>', html), f'Display date changed: {slug}')
 for old in (root / 'static/files').glob('*.pdf'):
     digest = hashlib.sha256(old.read_bytes()).hexdigest()
     for folder in ('source/files', 'public/files'):
         target = root / folder / old.name
         require(target.exists() and hashlib.sha256(target.read_bytes()).hexdigest() == digest, f'Attachment mismatch: {target}')
 index = json.loads((public / 'search.json').read_text())
-require(all(any(item['path'] == f'/posts/{slug}/' for item in index) for slug in posts), 'Search is missing historical articles')
+require(all(any(item['path'] == f'/posts/{slug}/' for item in index) for slug in active_posts), 'Search is missing historical articles')
+require(not any(item['path'] == f'/posts/{slug}/' for item in index for slug in deleted), 'Search contains deleted articles')
 require(len({item['path'] for item in index}) == len(index), 'Duplicate search entries')
-require(len(re.findall(r'<a class="post-card ', (public / 'index.html').read_text())) >= 6, 'Homepage lost article cards')
+require(len(re.findall(r'<a class="post-card ', (public / 'index.html').read_text())) >= min(6, len(active_posts)), 'Homepage lost article cards')
 require('localhost' not in (public / 'index.xml').read_text(), 'Feed points to localhost')
-require('class="highlight go"' in (public / 'posts/eddsa_mpc/index.html').read_text(), 'Historical Go code is not highlighted')
+if 'eddsa_mpc' not in history:
+    require('class="highlight go"' in (public / 'posts/eddsa_mpc/index.html').read_text(), 'Historical Go code is not highlighted')
 
 pages = {path.resolve(): Page(path.read_text()) for path in public.rglob('*.html')}
+removed_pages = {path.resolve() for path in public.rglob('*.html') if 'id="studio-removed"' in path.read_text()}
+for page in removed_pages:
+    route = '/' + page.relative_to(public.resolve()).as_posix().removesuffix('index.html')
+    require(not any(item['path'] == route for item in index), f'Search contains removed article: {route}')
 for path, page in pages.items():
     for link in page.links + ([page.refresh] if page.refresh else []):
         parsed = urlsplit(link)
@@ -69,7 +89,7 @@ for path, page in pages.items():
             target /= 'index.html'
         require(target.exists(), f'Broken link: {path.relative_to(public)} -> {link}')
         # Ignore runtime-only theme anchors. Markdown TOC anchors must exist.
-        if parsed.fragment and parsed.fragment not in ('', 'start', 'search-input') and target.resolve() in pages:
+        if parsed.fragment and parsed.fragment not in ('', 'start', 'search-input') and target.resolve() in pages and target.resolve() not in removed_pages:
             require(unquote(parsed.fragment) in pages[target.resolve()].ids, f'Broken anchor: {link}')
         if page.refresh and link == page.refresh:
             require(target.resolve() != path, f'Self-redirect: {path}')
@@ -78,4 +98,4 @@ for old in ('posts', 'search', 'publication/Blockchain&Cloud', 'publication/Bloc
 require(not list((root / 'scripts').glob('*.py')), 'Hexo scripts/ cannot contain Python files')
 if errors:
     raise SystemExit('\n'.join(sorted(set(errors))))
-print(f'PASS: Stellar on {len(pages)} pages; 6 original articles and 3 PDFs preserved; search, assets, old URLs and anchors valid.')
+print(f'PASS: Stellar on {len(pages)} pages; historical archives and PDFs preserved; {len(history)} managed historical articles; search, assets, old URLs and anchors valid.')

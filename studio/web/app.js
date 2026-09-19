@@ -200,31 +200,75 @@ function renderLibrary() {
       run(async () => {
         await save();
         if (state.tab === "posts") {
-          const text =
-            "---\ntitle: " +
-            JSON.stringify(p.title + "（新稿）") +
-            "\ncategories: " +
-            JSON.stringify(p.categories) +
-            "\ntags: " +
-            JSON.stringify(p.tags) +
-            "\ncontent_type: " +
-            JSON.stringify(p.contentType || "article") +
-            "\nsource_url: " +
-            JSON.stringify(p.source || "") +
-            "\n---\n" +
-            p.body;
           open(
-            await api("import", { raw: text, filename: p.slug + "-new.md" }),
+            await api("edit-post", {
+              path: p.path,
+              contentHash: p.contentHash,
+            }),
           );
           message(
-            "已复制为新草稿，原文未修改。若是本工具发布的文章，请从“草稿”打开原稿进行更新。",
+            "已打开原文编辑草稿（已有本地修改会保留）。保存仅影响本机；检查并预览、确认发布后才更新线上原文。",
           );
           await refresh();
         } else open(state.drafts.find((x) => x.id === p.id) || p);
       });
     container.append(button);
+    if (state.tab === "posts") {
+      button.title = "编辑已发布文章";
+      const remove = element("button", "删除文章", "text-button danger");
+      remove.setAttribute("aria-label", "删除文章：" + p.title);
+      remove.onclick = () =>
+        run(async () => {
+          await save();
+          message("正在检查删除影响和构建结果，尚未删除线上文章…");
+          const plan = await api("prepare-delete", {
+            path: p.path,
+            contentHash: p.contentHash,
+          });
+          state.deletion = plan;
+          $("deleteTitle").textContent = plan.title;
+          $("deleteSlugHint").textContent = plan.slug;
+          $("deleteSlug").value = "";
+          $("confirmDelete").checked = false;
+          $("deleteSubmit").disabled = true;
+          $("deleteError").hidden = true;
+          $("deleteFiles").replaceChildren(
+            ...plan.files.map((f) => element("li", `${f.action}：${f.path}`)),
+          );
+          $("deleteBefore").textContent = plan.before;
+          $("deleteDialog").showModal();
+        });
+      container.append(remove);
+    }
   }
 }
+bind("closeDelete", () => $("deleteDialog").close());
+function deleteConfirmation() {
+  $("deleteSubmit").disabled =
+    !$("confirmDelete").checked ||
+    $("deleteSlug").value !== state.deletion?.slug;
+}
+$("confirmDelete").onchange = deleteConfirmation;
+$("deleteSlug").oninput = deleteConfirmation;
+bind("deleteSubmit", async () => {
+  try {
+    const job = await api("delete-post", {
+      key: state.deletion.key,
+      slug: $("deleteSlug").value,
+      confirmed: $("confirmDelete").checked,
+    });
+    state.jobs = [job, ...state.jobs.filter((j) => j.id !== job.id)];
+    invalidate();
+    $("deleteDialog").close();
+    renderJobs();
+    message(
+      "删除任务已启动，请等待下方部署结果。完成后点击同步刷新文章列表；本地草稿保留。",
+    );
+  } catch (e) {
+    $("deleteError").textContent = e.message;
+    $("deleteError").hidden = false;
+  }
+});
 async function refresh() {
   const library = await api("library");
   state.drafts = library.drafts;
