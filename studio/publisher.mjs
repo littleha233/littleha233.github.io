@@ -425,6 +425,27 @@ export class Publisher {
         });
         await fs.writeFile(path.join(dir, file.path), file.bytes);
       }
+      // Preview the local math fix before it is deployed, but never publish a
+      // formula against an older remote renderer that would display raw TeX.
+      let mathPending = false;
+      for (const file of ["scripts/math.js", "source/css/math.css"]) {
+        const local = await fs.readFile(path.join(this.root, file));
+        let remote;
+        try {
+          remote = await fs.readFile(path.join(dir, file));
+        } catch (e) {
+          if (e.code !== "ENOENT") throw e;
+        }
+        if (remote && !remote.equals(local))
+          throw new Error("本地与远端数学渲染版本不同，请先同步工作台代码");
+        if (!remote) {
+          mathPending = true;
+          await fs.mkdir(path.dirname(path.join(dir, file)), {
+            recursive: true,
+          });
+          await fs.writeFile(path.join(dir, file), local);
+        }
+      }
       await command(
         process.execPath,
         [path.join(this.root, "node_modules/hexo/bin/hexo"), "generate"],
@@ -433,6 +454,9 @@ export class Publisher {
       await command("python3", ["tools/verify-stellar.py"], dir);
       const target = path.join(dir, "public", "posts", doc.slug, "index.html");
       await fs.access(target);
+      mathPending =
+        mathPending &&
+        (await fs.readFile(target, "utf8")).includes('class="katex"');
       // Each browser tab gets a distinct preview namespace, including assets/search.
       const key = randomUUID();
       const prefix = `/p/${key}/`;
@@ -466,6 +490,7 @@ export class Publisher {
         contentHash: hash(markdown),
         created: Date.now(),
         slug: doc.slug,
+        mathPending,
       };
       this.previews.set(key, preview);
       for (const [k, p] of this.previews)
@@ -482,6 +507,11 @@ export class Publisher {
         files: files.map((x) => ({ path: x.path, size: x.bytes.length })),
         warnings: [
           ...warnings(doc),
+          ...(mathPending
+            ? [
+                "公式已在本地预览渲染；数学修复尚未合并部署到 main，暂不能发布这篇含公式文章。请先合并修复，再重新预览发布。",
+              ]
+            : []),
           ...(files.some((f) => f.path === "tools/verify-stellar.py")
             ? [
                 "本次同时更新文章管理所需的构建检查器，详见文件清单；迁移原稿仍保留在 content/posts",
@@ -508,6 +538,10 @@ export class Publisher {
     const p = this.previews.get(key);
     if (!p || Date.now() - p.created > 3600000)
       throw new Error("预览已过期，请重新检查");
+    if (p.mathPending)
+      throw new Error(
+        "请先将数学渲染修复合并部署到 main，再重新预览和发布；不会把本地预览效果误报为线上支持",
+      );
     if (p.operation === "delete" && !deletionConfirmed)
       throw new Error("删除必须通过专用确认入口");
     const doc =
