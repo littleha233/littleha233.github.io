@@ -1,0 +1,93 @@
+.reading-controls {
+  display: none;
+}
+
+/* Match Stellar's desktop breakpoint; smaller screens keep its drawers. */
+@media screen and (min-width: 1181px) {
+  .l_body.reading-layout {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1920px;
+    padding: 24px;
+    gap: 24px;
+    grid-template-columns: 248px minmax(0, 1fr) 280px;
+    align-items: start;
+  }
+
+  .reading-layout > .l_left,
+  .reading-layout > .l_right {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    top: 24px;
+  }
+
+  .reading-layout > .l_main {
+    min-width: 0;
+    width: 100%;
+    padding-top: 0;
+  }
+
+  .reading-layout > .float-panel {
+    grid-column: 1 / -1;
+  }
+
+  .reading-layout.reading-hide-left {
+    grid-template-columns: minmax(0, 1fr) 280px;
+  }
+
+  .reading-layout.reading-hide-right,
+  .reading-layout.reading-no-right {
+    grid-template-columns: 248px minmax(0, 1fr);
+  }
+
+  .reading-layout.reading-hide-left.reading-hide-right,
+  .reading-layout.reading-hide-left.reading-no-right {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .reading-hide-left > .l_left,
+  .reading-hide-right > .l_right,
+  .reading-no-right > .l_right {
+    display: none;
+  }
+
+  .reading-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 7;
+    padding: 8px 0;
+    margin-bottom: 12px;
+    background: var(--background);
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  .reading-controls > span {
+    margin-right: auto;
+    color: var(--text-meta);
+  }
+
+  .reading-controls button {
+    border: 1px solid var(--block-border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font: inherit;
+    color: inherit;
+    background: var(--card);
+    cursor: pointer;
+  }
+
+  .reading-controls button:hover {
+    background: var(--block);
+  }
+
+  .reading-controls button:focus-visible {
+    outline: 2px solid var(--theme);
+    outline-offset: 2px;
+  }
+}
