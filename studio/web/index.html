@@ -177,10 +177,11 @@
         ></textarea>
         <div id="previewPanel" hidden>
           <div class="preview-bar">
-            <span>独立构建 · 真实主题 · 未公开</span
+            <span id="previewStatus">独立构建 · 真实主题 · 未公开</span
             ><a id="previewLink" target="_blank" rel="noreferrer"
-              >独立窗口 ↗</a
+              >完整主题预览 ↗</a
             >
+            <button id="reloadPreview" type="button">重新加载预览</button>
           </div>
           <iframe
             id="preview"

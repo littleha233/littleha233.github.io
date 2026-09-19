@@ -5,6 +5,8 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { randomUUID } from "node:crypto";
 import { serialize, hash, parseMarkdown, warnings } from "./core.mjs";
+import { createPreviewPages } from "./preview.mjs";
+import { diagnostics } from "./diagnostics.mjs";
 const exec = promisify(execFile);
 export const REPO = "littleha233/littleha233.github.io";
 export const SITE = "https://littleha233.github.io";
@@ -86,6 +88,7 @@ export class Publisher {
     this.previews = new Map();
     this.jobs = new Map();
     this.busy = false;
+    this.diagnostic = diagnostics(store.root);
   }
   async init() {
     await fs.mkdir(path.join(this.store.root, "jobs"), { recursive: true });
@@ -343,12 +346,20 @@ export class Publisher {
     if (this.busy) throw new Error("正在构建或发布，请稍后重试");
     this.busy = true;
     let dir;
+    const started = Date.now();
+    let stage = "validate";
+    await this.diagnostic("prepare-start", { id });
     try {
       const doc = await this.store.get(id),
         markdown = serialize(doc);
+      await this.diagnostic("prepare-validated", {
+        id,
+        markdownBytes: Buffer.byteLength(markdown),
+      });
       if (warnings(doc).some((x) => /私钥|令牌/.test(x)))
         throw new Error("检测到疑似密钥，已阻止预览和发布，请先移除");
       let offline = false;
+      stage = "sync";
       if (sync) {
         try {
           await this.sync();
@@ -374,6 +385,7 @@ export class Publisher {
           "文章地址已存在，或线上文章已被其他人修改。请换新地址，避免覆盖",
         );
       dir = await fs.mkdtemp(path.join(os.tmpdir(), "nicola-studio-"));
+      stage = "snapshot";
       const archive = path.join(dir, "snapshot.tar");
       await command(
         "git",
@@ -425,6 +437,7 @@ export class Publisher {
         });
         await fs.writeFile(path.join(dir, file.path), file.bytes);
       }
+      stage = "build";
       // Preview the local math fix before it is deployed, but never publish a
       // formula against an older remote renderer that would display raw TeX.
       let mathPending = false;
@@ -459,6 +472,7 @@ export class Publisher {
         (await fs.readFile(target, "utf8")).includes('class="katex"');
       // Each browser tab gets a distinct preview namespace, including assets/search.
       const key = randomUUID();
+      stage = "preview-build";
       const prefix = `/p/${key}/`;
       await fs.writeFile(
         path.join(dir, "_studio_preview.yml"),
@@ -492,6 +506,13 @@ export class Publisher {
         slug: doc.slug,
         mathPending,
       };
+      const display = await createPreviewPages(dir, doc.slug, prefix);
+      await this.diagnostic("prepare-success", {
+        id,
+        key,
+        ...display,
+        durationMs: Date.now() - started,
+      });
       this.previews.set(key, preview);
       for (const [k, p] of this.previews)
         if (k !== key && Date.now() - p.created > 3600000) {
@@ -500,6 +521,7 @@ export class Publisher {
         }
       return {
         key,
+        display,
         id,
         version: doc.version,
         base,
@@ -526,6 +548,12 @@ export class Publisher {
         after: markdown,
       };
     } catch (e) {
+      await this.diagnostic("prepare-failure", {
+        id,
+        stage,
+        durationMs: Date.now() - started,
+        code: String(e.code || e.name).slice(0, 80),
+      });
       if (dir) await fs.rm(dir, { recursive: true, force: true });
       throw new Error("构建检查失败：" + (e.stderr?.slice(-2400) || e.message));
     } finally {
