@@ -1,0 +1,19 @@
+/* Inherit Stellar's light/dark text color; keep long display math inside its box. */
+.katex {
+  color: inherit;
+}
+.katex-display {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.3em 0;
+}
+.katex-display > .katex {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+}
+.katex-error {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

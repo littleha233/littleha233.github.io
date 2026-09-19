@@ -52,3 +52,8 @@ npm run check
 6 篇文章、3 份 PDF 已迁移，原文章地址和旧学术文章入口继续可用。日期转为 Hexo 的上海时区格式，保持原始日期与时间。见 `docs/STELLAR-MIGRATION.md`。
 
 `content/`、`layouts/`、`assets/`、`static/` 和 `config.toml` 是上一版 Hugo 快照，供核验与回溯，不参与当前发布。后续只编辑 `source/` 下的文章。旧验证脚本移动到 `tools/verify-hugo.py`，避免被 Hexo 当作 JavaScript 执行。
+# 本地博客工作台
+
+现在可以双击 `启动博客工作台.command`，或运行 `npm run studio`，访问 http://127.0.0.1:4313/。
+支持文章/生活随记、代码片段、GPT 对话摘录，提供文件与粘贴导入、分类标签建议与手填、附件、自动保存、Stellar 预览及确认发布。
+首次发布先执行 `gh auth login`。[完整使用说明](docs/BLOG-STUDIO.md)。

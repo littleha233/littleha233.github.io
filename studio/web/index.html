@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>博客工作台 · Nicola Von</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="/"
+        ><span class="monogram">N<span>·</span></span
+        ><span>Nicola Von<small>博客工作台 / LOCAL STUDIO</small></span></a
+      >
+      <button class="primary wide" id="new">＋ 新建内容</button>
+      <button class="wide capture-button" id="capture">粘贴代码 / 对话</button>
+      <label class="import-button"
+        >导入文档 / 代码 / JSON<input
+          id="import"
+          type="file"
+          accept=".md,.markdown,.txt,.json,.js,.mjs,.ts,.tsx,.jsx,.py,.go,.rs,.java,.sh,.zsh,.sql,.html,.css,.yaml,.yml,.toml,.xml,.c,.h,.cpp,.cs,.rb,.php,.swift,.kt,.r,.vue"
+      /></label>
+      <div class="section-label">
+        内容库
+        <button id="sync" class="text-button" title="同步远端文章">同步</button>
+      </div>
+      <div class="tabs">
+        <button id="draftTab" class="selected">
+          草稿 <span id="draftCount">0</span></button
+        ><button id="postTab">已发布 <span id="postCount">0</span></button>
+      </div>
+      <label class="sr-only" for="search">搜索文章</label
+      ><input id="search" class="search" placeholder="搜索标题、分类或标签…" />
+      <label class="sr-only" for="typeFilter">筛选内容类型</label>
+      <select id="typeFilter" class="type-filter">
+        <option value="">全部内容</option>
+        <option value="article">文章</option>
+        <option value="snippet">代码片段</option>
+        <option value="conversation">对话摘录</option>
+      </select>
+      <nav id="library" aria-label="文章列表"></nav>
+      <div class="sidebar-footer">
+        <span class="dot"></span> 仅保存在这台 Mac
+        <p>草稿不会自动上传。<br />每次发布都需要你的确认。</p>
+        <button id="settings" class="text-button">发布连接与帮助 ↗</button>
+      </div>
+    </aside>
+    <main>
+      <header>
+        <div>
+          <span class="eyebrow">WRITE / ORGANIZE / PUBLISH</span>
+          <h1>让值得留下的，都有归处。</h1>
+        </div>
+        <a
+          href="https://littleha233.github.io/"
+          target="_blank"
+          rel="noreferrer"
+          class="site-link"
+          >查看博客 ↗</a
+        >
+      </header>
+      <div id="message" role="status" aria-live="polite" hidden></div>
+      <section id="welcome" class="welcome">
+        <span class="eyebrow">YOUR NEXT IDEA STARTS HERE</span>
+        <h2>文章、代码，还有启发你的对话。</h2>
+        <p>
+          从一段文字、一份代码或一次有价值的问答开始。<br />整理分类与标签，再用真实
+          Stellar 主题预览。
+        </p>
+        <div class="welcome-steps">
+          <div>
+            <b>01</b><strong>写下内容</strong
+            ><span>导入文件，或粘贴代码和问答</span>
+          </div>
+          <div>
+            <b>02</b><strong>整理知识</strong
+            ><span>自动提取分类，手动调整标签</span>
+          </div>
+          <div>
+            <b>03</b><strong>预览发布</strong><span>检查通过后，确认上线</span>
+          </div>
+        </div>
+        <button id="start" class="primary">开始第一篇文章 →</button>
+      </section>
+      <section id="workspace" hidden>
+        <div class="article-top">
+          <span id="articleState" class="badge">本地草稿</span
+          ><span id="saveState">尚未保存</span>
+          <div class="top-actions">
+            <button id="export">导出 MD</button
+            ><button id="save">保存草稿</button
+            ><button id="prepare" class="primary">检查并预览 →</button>
+          </div>
+        </div>
+        <div class="content-metadata">
+          <label
+            >内容类型<select id="contentType">
+              <option value="article">文章 / 随记</option>
+              <option value="snippet">代码片段</option>
+              <option value="conversation">对话摘录</option>
+            </select></label
+          >
+          <label
+            >来源链接（可选，将公开）<input
+              id="source"
+              type="url"
+              placeholder="https://…"
+          /></label>
+        </div>
+        <p id="typeHint" class="type-hint"></p>
+        <label class="sr-only" for="title">文章标题</label
+        ><input
+          id="title"
+          class="title-input"
+          placeholder="给这篇思考起个名字"
+        />
+        <div class="metadata">
+          <label
+            >文章地址
+            <input
+              id="slug"
+              placeholder="my-new-post"
+              spellcheck="false"
+            /><small
+              >/posts/<span id="slugHint">my-new-post</span>/</small
+            ></label
+          ><label
+            >发布时间 · 上海 <input id="date" placeholder="2026-09-15 23:00:00"
+          /></label>
+        </div>
+        <div class="taxonomy">
+          <label
+            >分类
+            <input
+              id="categories"
+              placeholder="如：工程实践"
+              list="categoryOptions"
+            /><small>多个分类用逗号分隔（Stellar 将按层级展示）</small></label
+          ><label
+            >标签
+            <input
+              id="tags"
+              placeholder="如：Git, 自动化, 学习记录"
+              list="tagOptions"
+            /><small>多个标签用逗号分隔，可完全自定义</small></label
+          ><button id="suggest" class="suggest-button">✧ 提取建议</button>
+        </div>
+        <datalist id="categoryOptions"></datalist
+        ><datalist id="tagOptions"></datalist>
+        <div id="suggestions" class="suggestions" hidden>
+          <div><b>内容建议</b><span id="suggestMethod"></span></div>
+          <p id="suggestText"></p>
+          <button id="applySuggest">合并分类 / 标签并补齐摘要</button
+          ><button id="dismissSuggest">暂不采用</button>
+        </div>
+        <label class="summary-label"
+          >摘要
+          <textarea
+            id="description"
+            rows="2"
+            placeholder="用一两句话说明这篇文章值得阅读的地方（也可以自动提取）"
+          ></textarea>
+        </label>
+        <div class="editor-tabs">
+          <button id="editMode" class="selected">Markdown 编辑</button
+          ><button id="previewMode">Stellar 预览</button
+          ><span id="wordCount">0 字</span><button id="format">整理格式</button
+          ><button id="undoFormat" hidden>撤销整理</button>
+        </div>
+        <textarea
+          id="body"
+          class="editor"
+          spellcheck="false"
+          aria-label="Markdown 正文"
+          placeholder="在这里写下你的工作、研究和思考…"
+        ></textarea>
+        <div id="previewPanel" hidden>
+          <div class="preview-bar">
+            <span>独立构建 · 真实主题 · 未公开</span
+            ><a id="previewLink" target="_blank" rel="noreferrer"
+              >独立窗口 ↗</a
+            >
+          </div>
+          <iframe
+            id="preview"
+            title="Stellar 文章预览"
+            sandbox="allow-scripts allow-same-origin"
+            referrerpolicy="no-referrer"
+          ></iframe>
+        </div>
+        <section class="attachments">
+          <div>
+            <h3>图片与附件</h3>
+            <p>
+              支持图片、PDF，每个最大 10 MB。与原文同名的相对链接会自动替换。
+            </p>
+          </div>
+          <label class="import-button small"
+            >＋ 添加附件<input
+              id="attachments"
+              type="file"
+              accept=".png,.jpg,.jpeg,.gif,.webp,.avif,.pdf"
+              multiple
+          /></label>
+          <ul id="assetList"></ul>
+        </section>
+        <section id="release" class="release" hidden>
+          <div>
+            <span class="eyebrow">READY FOR REVIEW</span>
+            <h3>发布前，最后看一眼。</h3>
+            <p>
+              仅提交清单中的当前文章、附件及必要的文章管理检查文件，不包含其他草稿或无关代码修改。
+            </p>
+          </div>
+          <ul id="fileList"></ul>
+          <p id="warnings"></p>
+          <details>
+            <summary>查看即将提交的 Markdown</summary>
+            <pre id="releaseMarkdown"></pre>
+          </details>
+          <label class="confirm"
+            ><input
+              type="checkbox"
+              id="confirm"
+            />我已检查正文、附件和敏感信息，确认公开发布。</label
+          ><button id="publish" class="primary" disabled>
+            发布到 GitHub Pages ↗
+          </button>
+          <p class="hint">这会提交到公开仓库 main 分支并触发部署。</p>
+        </section>
+      </section>
+      <section id="jobPanel" class="job-panel" hidden>
+        <h3>发布进度</h3>
+        <div id="jobList"></div>
+      </section>
+      <footer>
+        写作属于你，繁琐交给工作台。<span
+          >Markdown · Stellar · GitHub Pages</span
+        >
+      </footer>
+    </main>
+    <dialog id="help">
+      <button id="closeHelp" class="close" aria-label="关闭">×</button
+      ><span class="eyebrow">PUBLISH CONNECTION</span>
+      <h2>连接一次，之后专注写作。</h2>
+      <p id="authState">正在检查…</p>
+      <button id="checkAuth">检查 GitHub 连接</button>
+      <h3>首次使用</h3>
+      <p>在终端运行下面的命令，按提示登录有仓库写权限的 GitHub 账号：</p>
+      <pre>gh auth login</pre>
+      <p>
+        选择 GitHub.com，通过浏览器完成登录。工作台使用系统中的 GitHub CLI
+        凭据，不保存或展示你的令牌。对话中的 GitHub 连接不能代替本机登录。
+      </p>
+      <h3>使用说明</h3>
+      <p>
+        ① 导入 MD，读取 YAML 标题、日期、分类、标签。<br />②
+        点击“提取建议”，确认后合并；也可直接输入。<br />③ 添加原文引用的图片或
+        PDF。<br />④ 保存并检查预览，确认后发布，等待“文章已上线”。
+      </p>
+      <p>
+        草稿存于项目
+        .blog-studio/，不会上传。在“已发布”列表点击文章即可编辑原文，保存不会立即上线。
+        点击“删除文章”并完成确认后才会移除线上正文，原链接显示删除提示。 Git
+        历史、迁移归档和附件仍保留；删除不适用于彻底清除敏感数据。
+      </p>
+      <p>
+        提示：摘要和标签提取在本机完成，采用关键词规则，不是 AI
+        改写。格式整理不润色正文。请自行复核敏感信息；检查器不能保证发现所有秘密。
+      </p>
+    </dialog>
+    <dialog id="deleteDialog" class="capture-dialog">
+      <button id="closeDelete" class="close" aria-label="取消删除">×</button>
+      <h2>确认删除已发布文章</h2>
+      <h3 id="deleteTitle"></h3>
+      <p>
+        将从首页、归档和搜索中移除文章，旧链接显示“文章已移除”。附件、迁移原稿、Git
+        历史和本地草稿保留，可通过历史提交恢复；这不是彻底清除数据。
+      </p>
+      <p>
+        下面是完整提交清单，必要时包含迁移保护记录及构建检查器更新。确认后将提交至公开仓库
+        main 并触发部署。
+      </p>
+      <ul id="deleteFiles"></ul>
+      <details>
+        <summary>查看将删除的原文（可复制备份）</summary>
+        <pre id="deleteBefore"></pre>
+      </details>
+      <label
+        >请输入文章地址：<strong id="deleteSlugHint"></strong
+        ><input id="deleteSlug" autocomplete="off" spellcheck="false"
+      /></label>
+      <label class="confirm"
+        ><input
+          id="confirmDelete"
+          type="checkbox"
+        />我确认移除这篇文章，并了解历史记录及附件仍会保留。</label
+      >
+      <p id="deleteError" role="alert" hidden></p>
+      <button id="deleteSubmit" class="danger" disabled>确认删除并部署</button>
+    </dialog>
+    <dialog id="captureDialog" class="capture-dialog">
+      <button id="closeCapture" class="close" aria-label="关闭内容导入">
+        ×
+      </button>
+      <span class="eyebrow">CAPTURE WHAT MATTERS</span>
+      <h2>留下一段有价值的内容</h2>
+      <p>只在本机处理，转换为可编辑的 Markdown 草稿，不会立即发布。</p>
+      <div class="content-metadata">
+        <label
+          >导入方式<select id="captureMode">
+            <option value="article">文章 / Markdown / 随记</option>
+            <option value="snippet">代码片段</option>
+            <option value="conversation-text">对话文本</option>
+            <option value="conversation-json">对话 JSON</option>
+          </select></label
+        >
+        <label
+          >标题（可选）<input
+            id="captureTitle"
+            placeholder="为这段内容起个名字"
+        /></label>
+      </div>
+      <label id="languageLabel"
+        >代码语言<input
+          id="captureLanguage"
+          list="languageOptions"
+          value="text"
+          placeholder="python / javascript / go / text"
+      /></label>
+      <datalist id="languageOptions">
+        <option value="python"></option>
+        <option value="javascript"></option>
+        <option value="typescript"></option>
+        <option value="go"></option>
+        <option value="java"></option>
+        <option value="rust"></option>
+        <option value="bash"></option>
+        <option value="sql"></option>
+        <option value="html"></option>
+        <option value="json"></option>
+        <option value="text"></option>
+      </datalist>
+      <p id="captureHint"></p>
+      <label for="captureText">原始内容</label
+      ><textarea
+        id="captureText"
+        rows="12"
+        spellcheck="false"
+        placeholder="粘贴 Markdown、代码，或带有“我： / GPT：”标记的问答"
+      ></textarea>
+      <div id="conversationPicker" hidden>
+        <button id="listConversations">读取对话目录（不保存草稿）</button
+        ><label
+          >只导入这一段对话<select id="conversationChoice">
+            <option value="">请先读取目录并选择</option>
+          </select></label
+        >
+      </div>
+      <p id="captureError" role="alert" hidden></p>
+      <button id="createCapture" class="primary">生成本地草稿 →</button>
+    </dialog>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
